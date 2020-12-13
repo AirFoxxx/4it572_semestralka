@@ -21,7 +21,7 @@ jobs:
       - attach_workspace:
           at: .
       - run: pip3 install ansible boto boto3
-      - run: echo $SSH_PRIVATE_KEY > newkey2.pem
+      - run: echo $SSH_PRIVATE_KEY | sed 's/<CRLF>/\n/g' > newkey2.pem
       - run: chmod 400 presentation.pem
       - run: >
           ANSIBLE_HOST_KEY_CHECKING=False
