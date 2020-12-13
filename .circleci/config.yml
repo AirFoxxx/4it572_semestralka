@@ -1,28 +1,34 @@
-vse: &vse
-  docker:
-    - image: circleci/node:8.11.3
-
 version: 2.1
+
 jobs:
   build:
-    <<: *vse
+    docker:
+      - image: circleci/node:8.11.3
     steps:
       - checkout
       - run: npm install
       - run: npm run test
       - run: npm run build
       - persist_to_workspace:
-         root: .
-         paths:
-            - .
-  deploy:
-     <<: *vse
-     steps:
-        - attach_workspace:
-           at: .
-        - run:
-           command: ./node_modules/.bin/firebase deploy --token "$FIREBASE_TOKEN"
+          root: .
+          paths:
+           - .ansible
 
+  deploy:
+    docker:
+      - image: circleci/python:3.7.7
+    steps:
+      - attach_workspace:
+          at: .
+      - run: pip3 install ansible boto boto3
+      - run: echo $SSH_PRIVATE_KEY > newkey2.pem
+      - run: chmod 400 presentation.pem
+      - run: >
+          ANSIBLE_HOST_KEY_CHECKING=False
+          ansible-playbook
+          .ansible/ec2_deploy.yml
+          --user=ubuntu
+          --key-file=newkey2.pem
 workflows:
   version: 2.1
   build:
@@ -30,7 +36,7 @@ workflows:
       - build
       - deploy:
          requires:
-            - build
+          - build
          filters:
-            branches:
-               only: master
+           branches:
+              only: master
