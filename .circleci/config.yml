@@ -24,10 +24,7 @@ jobs:
       - run: echo $SSH_PRIVATE_KEY | sed 's/<CRLF>/\n/g' > newkey2.pem
       - run: chmod 400 newkey2.pem
       - run: export ANSIBLE_HOST_KEY_CHECKING=False
-      - run: touch /etc/ansible/ansible.cfg
-      - run: echo "[defaults]" >> /etc/ansible/ansible.cfg
-      - run: echo "host_key_checking = False" >> /etc/ansible/ansible.cfg
-      - run: ansible-playbook .ansible/ec2_deploy.yml --user ubuntu --key-file newkey2.pem
+      - run: ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook .ansible/ec2_deploy.yml --user ubuntu --key-file newkey2.pem
 
 workflows:
   version: 2.1
